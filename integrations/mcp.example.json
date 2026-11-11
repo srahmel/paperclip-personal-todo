@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "ms365-personal-todo": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@softeria/ms-365-mcp-server@0.184.0",
+        "--org-mode",
+        "--read-only",
+        "--enabled-tools",
+        "^(verify-login|list-accounts|list-mail-messages|get-mail-message|list-mail-folder-messages|list-mail-folders|read-mail-text|list-chats|get-chat|list-chat-messages|get-chat-message|list-joined-teams|list-team-channels|list-channel-messages|list-channel-message-replies|get-channel-message)$"
+      ]
+    },
+    "playwright-agent-browser": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@0.0.85",
+        "--cdp-endpoint",
+        "http://127.0.0.1:REPLACE_WITH_OWN_AGENT_CDP_PORT"
+      ]
+    }
+  }
+}

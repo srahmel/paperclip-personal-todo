@@ -1,0 +1,5 @@
+dist
+node_modules
+.paperclip-sdk
+__pycache__/
+*.pyc
