@@ -1,37 +1,37 @@
-# Optionale MCP-Zugriffswege
+# Optional MCP access profiles
 
-Das Board bleibt die gemeinsame Aufgaben-Datenbank. Office und Fyxer bleiben getrennte Quellen. MCP-Server werden dem Import-Agenten zugeordnet; das Board muss dazu weder Microsoft-Tokens noch Browser-Sessions übernehmen.
+The board remains the shared task database. Office and Fyxer remain separate sources. MCP servers belong to the import agent; the board does not need Microsoft tokens or browser sessions.
 
-Die Datei [mcp.example.json](../integrations/mcp.example.json) ist eine **nicht aktivierte Vorlage**. Sie wird nicht beim Plugin-Start geladen, installiert keine Agentenverbindung und erteilt keine Rechte. Die npm-Versionen sind auf den geprüften Stand festgelegt.
+[mcp.example.json](../integrations/mcp.example.json) is a **disabled template**. Plugin startup does not load it, install an agent connection, or grant access. npm versions are pinned to the verified versions.
 
 ## Softeria Microsoft 365
 
-[Softeria/ms-365-mcp-server](https://github.com/Softeria/ms-365-mcp-server) spricht die Microsoft Graph API direkt an. Der Dienst unterstützt Outlook sowie im Organisationsmodus Teams. Der vorbereitete Aufruf nutzt `--org-mode`, `--read-only` und eine ausdrückliche Liste von Lese-Werkzeugen für Nachrichten, Chats und Kanäle. Kalender, Dateien, Kontakte, Senden und Verwaltungsaktionen sind in diesem Profil nicht enthalten.
+[Softeria/ms-365-mcp-server](https://github.com/Softeria/ms-365-mcp-server) accesses Microsoft Graph directly. It supports Outlook and, in organization mode, Teams. The prepared command uses `--org-mode`, `--read-only`, and an explicit allowlist of read tools for messages, chats, and channels. This profile excludes calendars, files, contacts, sending, and administration.
 
-Vor einer Anmeldung die tatsächlich abgeleiteten Berechtigungen mit denselben Optionen und zusätzlich `--list-permissions` prüfen. Die konkrete Microsoft-Anmeldung und gegebenenfalls eine Administratorzustimmung sind separate Schritte. Vorhandene Codex-/OWA-Sitzungen erzeugen keine Softeria-Anmeldung. Keine Tokens aus diesen Sitzungen kopieren. Der Nur-Lesen-Modus begrenzt angebotene Werkzeuge; ein früher erteilter, breiterer Token wird dadurch nicht rückwirkend eingeschränkt.
+Before signing in, inspect the derived permissions using the same options plus `--list-permissions`. Microsoft sign-in and any required administrator consent are separate steps. Existing Codex/OWA sessions do not authenticate Softeria; do not copy tokens from them. Read-only mode limits the tools offered, but does not retroactively narrow a previously issued token.
 
-Die aktiven Unternehmensregeln haben Vorrang. Wenn diese für Outlook ausschließlich OWA und direkte Codex-Outlook-Werkzeuge erlauben, bleibt Softeria vorbereitet, bis die konkrete Ausnahme für diesen Collector freigegeben und die maßgebliche Agentenregel angepasst wurde. Keine Outlook-Verbindung über einen Aggregator oder eine automatische Paperclip-Verbindungsanfrage anlegen.
+Active organization rules take precedence. If Outlook is restricted to OWA and direct Codex Outlook tools, leave Softeria prepared until a specific exception for this collector is authorized and the governing agent rule is updated. Do not create an aggregator-based Outlook connection or an automatic Paperclip connection request.
 
-Nach Freigabe und Anmeldung: Kontozuordnung prüfen, eine kleine Nachrichtenseite und einen bekannten Teams-Thread lesend abrufen, dann `provider: outlook` beziehungsweise `provider: teams` an das Board melden. Noch unzugängliche Kanäle bleiben ein Teilimport; sie dürfen nicht als vollständig geprüft gelten.
+After authorization and sign-in, verify the account mapping, read a small message page and a known Teams thread, then report `provider: outlook` or `provider: teams` to the board. Inaccessible channels remain a partial import and must not be reported as fully checked.
 
 ## Microsoft Playwright MCP
 
-[microsoft/playwright-mcp](https://github.com/microsoft/playwright-mcp) stellt Browser-Automatisierung bereit. Für allgemeine Webseiten bleibt der integrierte Browser der erste Weg. Für die vorgeschriebene OWA-Ausnahme kann ein vorhandenes eigenes Brave-Agentenprofil über seinen CDP-Endpunkt verwendet werden.
+[microsoft/playwright-mcp](https://github.com/microsoft/playwright-mcp) provides browser automation. Use the integrated browser first for general websites. For the required OWA exception, an existing agent-owned Brave profile can be accessed through its CDP endpoint.
 
-In der Vorlage muss `REPLACE_WITH_OWN_AGENT_CDP_PORT` durch den tatsächlich laufenden **eigenen** Agenten-Endpunkt ersetzt werden. Ein vorhandenes Profil wird ohne Neustart genutzt. Kein zweites Browserprogramm mit demselben Profilordner starten. Läuft noch kein Profil, erfolgt der Start über den vorgesehenen Agenten-Launcher im Headless-Modus, danach wird dessen tatsächlicher CDP-Endpunkt verwendet.
+Replace `REPLACE_WITH_OWN_AGENT_CDP_PORT` in the template with the **agent's own** running endpoint. Reuse an existing profile without restarting it. Do not launch another browser against the same profile directory. If no profile is running, use the prescribed agent launcher in headless mode, then use its actual CDP endpoint.
 
-Playwright ist kein technisch auf Lesen begrenzter Daten-Connector. Die geltenden Aktionsfreigaben gelten weiterhin. Keine Cookie-/Storage-Exporte, kein Auslesen von Zugangsdaten, keine globale Eingabe oder Fokusaktivierung eines Headless-Fensters. Keine Aktionen, die Nachrichten senden, Aufgaben in Fyxer abhaken oder Einstellungen ändern. Bei 2FA oder fehlgeschlagener Anmeldung ist eine gezielte Nutzerinteraktion nötig.
+Playwright is not a technically read-only data connector. Existing action approvals still apply. Do not export cookies/storage, read credentials, use global input, or activate/focus a headless window. Do not send messages, complete Fyxer tasks, or change settings. Request focused user assistance for 2FA or a failed sign-in.
 
-Der CDP-Aufruf wurde hier als Konfigurationsweg vorbereitet; ein produktiver Microsoft-Login über diese Vorlage ist damit nicht nachgewiesen.
+The CDP command is prepared as a configuration option; this does not establish a verified production Microsoft sign-in through the template.
 
-## Fyxer bleibt eigenständig
+## Fyxer remains independent
 
-Weder Softeria noch Playwright sind Ersatz für die Fyxer-Datenquelle. Vorhandene Fyxer-Werkzeuge werden für Action Items, Aufzeichnungen und belegte Statusänderungen genutzt. Wenn Suchkontext verfügbar ist, Detail-/Transkriptzugriff aber fehlt, dürfen daraus belegte Aufgaben ergänzt werden; die Quelle bleibt **teilweise geprüft**. Fehlende Detailrechte dürfen nicht durch Session-/Token-Extraktion oder eine erfundene API umgangen werden.
+Neither Softeria nor Playwright replaces the Fyxer source. Use existing Fyxer tools for action items, recordings, and evidenced status changes. When search context is available but recording/transcript details are not, evidenced tasks may still be added; the source remains **partially checked**. Do not bypass missing detail permissions through session/token extraction or an invented API.
 
-## Einheitlicher Import
+## Consistent imports
 
-Unabhängig vom Zugriffsweg gelten dieselben Verträge: zuerst `list_tasks` beziehungsweise den HTTP-Helper `list` aufrufen, belegte Aufgaben mit stabilen Quellschlüsseln ergänzen, anschließend für jede Quelle tatsächlichen Zeitraum und Status melden. Bei großen Postfächern kleine Seiten und Zeitfenster nutzen und Ergebnisse zwischendurch speichern; keine kompletten Postfächer oder Transkripte in einen einzelnen Tool-Output laden.
+The same contract applies to every access path: first call `list_tasks` or the HTTP helper's `list` command, add evidenced tasks with stable source keys, then report the actual coverage period and status for each source. Use small pages and time windows for large mailboxes, saving progress between them. Do not load entire mailboxes or transcripts into one tool output.
 
-## Geprüfter Berechtigungsumfang
+## Verified permission scope
 
-Der vorbereitete Softeria-Aufruf wurde mit `--list-permissions` ohne Anmeldung geprüft. Er meldete ausschließlich `Mail.Read`, `Chat.ReadBasic`, `ChatMessage.Read`, `Team.ReadBasic.All`, `Channel.ReadBasic.All` und `ChannelMessage.Read.All`; keine deaktivierten Werkzeuge und keine Schreibberechtigungen. Das ist eine Prüfung der Konfiguration, kein Nachweis einer bereits erteilten Microsoft-Zustimmung.
+The prepared Softeria command was checked with `--list-permissions` without signing in. It reported only `Mail.Read`, `Chat.ReadBasic`, `ChatMessage.Read`, `Team.ReadBasic.All`, `Channel.ReadBasic.All`, and `ChannelMessage.Read.All`, with no disabled tools or write permissions. This verifies the configuration, not an existing Microsoft consent grant.

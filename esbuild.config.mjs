@@ -26,7 +26,7 @@ async function boardHtml() {
       );
       fonts += `@font-face{font-family:'${family}';font-style:normal;font-weight:${weight};font-display:swap;src:url(data:font/woff2;base64,${bytes.toString("base64")}) format('woff2');}`;
     }
-  const html = `<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; font-src 'self' data:; connect-src 'self'; img-src data:; base-uri 'none'; form-action 'none'"><title>Sebastians Aufgaben-Board</title><style>${fonts}${css}</style></head><body><div id="app"></div><script>${code.outputFiles[0].text.replaceAll("</script", "<\\/script")}</script></body></html>`;
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; font-src 'self' data:; connect-src 'self'; img-src data:; base-uri 'none'; form-action 'none'"><title>Sebastian's Task Board</title><style>${fonts}${css}</style></head><body><div id="app"></div><script>${code.outputFiles[0].text.replaceAll("</script", "<\\/script")}</script></body></html>`;
   await mkdir("dist/ui", { recursive: true });
   const licensedHtml = html.replace(
     "</head>",
@@ -48,7 +48,12 @@ const uiCtx = await esbuild.context({
 
 if (watch) {
   const { watch: watchFiles } = await import("node:fs");
-  for (const filename of ["src/board.ts", "src/board.css", "src/model.ts"])
+  for (const filename of [
+    "src/board.ts",
+    "src/board.css",
+    "src/model.ts",
+    "src/i18n.ts",
+  ])
     watchFiles(filename, () => {
       void boardHtml().catch(console.error);
     });

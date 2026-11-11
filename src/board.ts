@@ -1,3 +1,4 @@
+import { createI18n } from "./i18n.js";
 import {
   AREAS,
   localDay,
@@ -10,21 +11,25 @@ const companyId =
   document.querySelector<HTMLElement>("#app")?.dataset.companyId ??
   new URLSearchParams(location.search).get("companyId");
 const root = document.querySelector<HTMLElement>("#app")!;
+let i18n = createI18n(document.documentElement.lang);
+const tr = (key: string, values?: Record<string, string | number>) =>
+  i18n.t(key, values);
+const areaLabel = (key: keyof typeof AREAS) => i18n.message(AREAS[key]);
 const labels = {
-  open: "Offen",
-  doing: "In Arbeit",
-  waiting: "Wartet",
-  done: "Erledigt",
+  open: "Open",
+  doing: "In progress",
+  waiting: "Waiting",
+  done: "Done",
 };
 const categories = {
-  direct: "Direkt machbar",
-  partial: "Teilweise",
-  blocked: "Blockiert",
+  direct: "Ready to do",
+  partial: "Partial",
+  blocked: "Blocked",
 };
 const providers = {
   outlook: "Outlook",
   teams: "Teams",
-  fyxer: "Fyxer-Meetings",
+  fyxer: "Fyxer meetings",
 };
 type Snapshot = {
   tasks: Task[];
@@ -86,7 +91,7 @@ function button(label: string, fn: () => void, className?: string) {
   return b;
 }
 function dateLabel(value: string) {
-  return new Intl.DateTimeFormat("de-DE", {
+  return new Intl.DateTimeFormat(i18n.locale, {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -96,16 +101,14 @@ function dateLabel(value: string) {
 function error(e: unknown) {
   const n = document.querySelector<HTMLElement>("#error")!;
   n.hidden = false;
-  n.textContent = e instanceof Error ? e.message : String(e);
+  n.textContent = i18n.message(e instanceof Error ? e.message : String(e));
 }
 function clearError() {
   document.querySelector<HTMLElement>("#error")!.hidden = true;
 }
 async function api(body?: Record<string, unknown>) {
   if (!companyId)
-    throw new Error(
-      "Öffne das Aufgaben-Board über „Meine Aufgaben“ in Paperclip.",
-    );
+    throw new Error(tr("Open the task board from My tasks in Paperclip."));
   const response = await fetch(
     "/api/plugins/" +
       PLUGIN +
@@ -123,11 +126,10 @@ async function api(body?: Record<string, unknown>) {
     value = await response.json();
   } catch {
     throw new Error(
-      "Paperclip antwortet nicht mit gültigen Daten. Bitte melde dich erneut an.",
+      tr("Paperclip returned invalid data. Please sign in again."),
     );
   }
-  if (!response.ok)
-    throw new Error(value.error ?? "Die Anfrage ist fehlgeschlagen.");
+  if (!response.ok) throw new Error(value.error ?? tr("The request failed."));
   return value;
 }
 async function refresh() {
@@ -186,14 +188,37 @@ const db = {
     };
   },
 };
-root.innerHTML = `<main><div class="heading"><div><h1>Aufgaben-Board</h1><p class="subtitle" id="subtitle">Deine Aufgaben aus Outlook, Teams und Fyxer.</p></div><div class="heading-actions"><button id="theme" type="button" aria-label="Hell- und Dunkelmodus wechseln">◐</button><button id="add" class="primary" type="button">+ Aufgabe</button></div></div><div id="error" class="error" role="alert" hidden></div><div id="notice" class="notice" role="status" hidden></div><div id="stats" class="stats"></div><details class="sources" id="source-panel"><summary id="source-summary"></summary><div id="source-grid" class="source-grid"></div><div id="setup" class="setup"></div></details><div class="controls"><div id="kind-tabs" class="segmented" aria-label="Zuständigkeit"></div><div id="status-tabs" class="segmented" aria-label="Aufgabenstatus"></div><select id="area" aria-label="Bereich filtern"><option value="">Alle Bereiche</option></select><input id="search" type="search" placeholder="Suchen: Titel, Person, Gespräch" aria-label="Aufgaben durchsuchen"></div><div id="list" aria-live="polite"></div><p class="footer-note">Sebastians Aufgaben-Board · Deine Bearbeitungen bleiben bei späteren Imports erhalten. „Bei anderen“ erteilt keinen Ausführungsauftrag.</p></main><dialog id="editor" aria-labelledby="editor-title"><div class="dialog-head"><h2 id="editor-title">Aufgabe bearbeiten</h2><button id="close-editor" type="button" aria-label="Dialog schließen">×</button></div><form id="task-form"><div class="form-grid"><label class="wide">Aufgabe<input name="title" required maxlength="500" placeholder="Was ist der nächste konkrete Schritt?"></label><label>Zuständigkeit<select name="kind"><option value="mine">Meine Aufgabe</option><option value="delegated">Bei anderen</option></select></label><label id="owner-label">Person<input name="owner" maxlength="300"></label><label>Fällig am<input name="due" type="date"></label><label>Priorität<select name="prio"><option value="1">P1 · Hoch</option><option value="2">P2 · Normal</option><option value="3">P3 · Niedrig</option></select></label><label>Status<select name="status"></select></label><label>Bereich<select name="area"></select></label><label id="category-label">Machbarkeit<select name="category"><option value="direct">Direkt machbar</option><option value="partial">Teilweise</option><option value="blocked">Blockiert</option></select></label><label class="check-label"><input type="checkbox" name="hr">Personal</label><label class="wide">Deine Notiz<textarea name="note" maxlength="8000" placeholder="Deine Gedanken und nächsten Schritte"></textarea></label><label class="wide">So kann der Assistent helfen<textarea name="help" maxlength="8000"></textarea></label><label class="wide">Benötigte Angaben / Kontext<textarea name="needs" maxlength="8000"></textarea></label></div><div id="editor-error" class="error" role="alert" hidden></div><div class="footer"><button id="cancel" type="button">Abbrechen</button><button type="submit" class="primary">Speichern</button></div></form></dialog>`;
+root.innerHTML = `<main><div class="heading"><div><h1>Task board</h1><p class="subtitle" id="subtitle">Your tasks from Outlook, Teams, and Fyxer.</p></div><div class="heading-actions"><button id="theme" type="button" aria-label="Switch between light and dark mode">◐</button><button id="add" class="primary" type="button">+ Task</button></div></div><div id="error" class="error" role="alert" hidden></div><div id="notice" class="notice" role="status" hidden></div><div id="stats" class="stats"></div><details class="sources" id="source-panel"><summary id="source-summary"></summary><div id="source-grid" class="source-grid"></div><div id="setup" class="setup"></div></details><div class="controls"><div id="kind-tabs" class="segmented" aria-label="Ownership"></div><div id="status-tabs" class="segmented" aria-label="Task status"></div><select id="area" aria-label="Filter by area"><option value="">All areas</option></select><input id="search" type="search" placeholder="Search: title, person, meeting" aria-label="Search tasks"></div><div id="list" aria-live="polite"></div><p class="footer-note">Sebastian's Task Board · Your edits are preserved during future imports. Delegated tasks are for tracking and do not assign work.</p></main><dialog id="editor" aria-labelledby="editor-title"><div class="dialog-head"><h2 id="editor-title">Edit task</h2><button id="close-editor" type="button" aria-label="Close dialog">×</button></div><form id="task-form"><div class="form-grid"><label class="wide">Task<input name="title" required maxlength="500" placeholder="What is the next concrete step?"></label><label>Ownership<select name="kind"><option value="mine">My task</option><option value="delegated">Delegated</option></select></label><label id="owner-label">Person<input name="owner" maxlength="300"></label><label>Due date<input name="due" type="date"></label><label>Priority<select name="prio"><option value="1">P1 · High</option><option value="2">P2 · Normal</option><option value="3">P3 · Low</option></select></label><label>Status<select name="status"></select></label><label>Area<select name="area"></select></label><label id="category-label">Readiness<select name="category"><option value="direct">Ready to do</option><option value="partial">Partial</option><option value="blocked">Blocked</option></select></label><label class="check-label"><input type="checkbox" name="hr">Personnel</label><label class="wide">Your note<textarea name="note" maxlength="8000" placeholder="Your thoughts and next steps"></textarea></label><label class="wide">How the assistant can help<textarea name="help" maxlength="8000"></textarea></label><label class="wide">Required input / Context<textarea name="needs" maxlength="8000"></textarea></label></div><div id="editor-error" class="error" role="alert" hidden></div><div class="footer"><button id="cancel" type="button">Cancel</button><button type="submit" class="primary">Save</button></div></form></dialog>`;
 const selectArea = document.querySelector<HTMLSelectElement>("#area")!;
 const form = document.querySelector<HTMLFormElement>("#task-form")!;
 const dialog = document.querySelector<HTMLDialogElement>("#editor")!;
+// Capture only plugin-owned static copy before any task data or drafts are rendered.
+const staticText: [Text, string][] = [];
+const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+while (walker.nextNode()) {
+  const node = walker.currentNode as Text;
+  if (
+    node.textContent?.trim() &&
+    !["subtitle", "editor-title"].includes(node.parentElement?.id ?? "")
+  )
+    staticText.push([node, node.textContent]);
+}
+const staticAttributes: [Element, string, string][] = [];
+for (const element of root.querySelectorAll("*"))
+  for (const name of ["aria-label", "placeholder"])
+    if (element.hasAttribute(name))
+      staticAttributes.push([element, name, element.getAttribute(name)!]);
+function localizeStaticCopy() {
+  for (const [node, key] of staticText) node.textContent = tr(key);
+  for (const [element, name, key] of staticAttributes)
+    element.setAttribute(name, tr(key));
+  document.title = tr("Sebastian's Task Board");
+}
+localizeStaticCopy();
 for (const [value, label] of Object.entries(AREAS)) {
-  selectArea.add(new Option(label, value));
+  selectArea.add(new Option(i18n.message(label), value));
   (form.elements.namedItem("area") as HTMLSelectElement).add(
-    new Option(label, value),
+    new Option(i18n.message(label), value),
   );
 }
 selectArea.value = area;
@@ -226,7 +251,7 @@ function adjustForm() {
   status.replaceChildren(
     ...Object.entries(labels)
       .filter(([k]) => !delegated || k !== "doing")
-      .map(([k, v]) => new Option(v, k)),
+      .map(([k, v]) => new Option(tr(v), k)),
   );
   status.value = [...status.options].some((o) => o.value === current)
     ? current
@@ -236,8 +261,8 @@ function openEditor(task: Task | null) {
   editing = task;
   form.reset();
   document.querySelector("#editor-title")!.textContent = task
-    ? "Aufgabe bearbeiten"
-    : "Neue Aufgabe";
+    ? tr("Edit task")
+    : tr("New task");
   const defaults = { kind, prio: 2, area: "org", category: "partial", ...task };
   for (const name of [
     "title",
@@ -317,7 +342,9 @@ form.onsubmit = async (e) => {
   } catch (err) {
     const n = document.querySelector<HTMLElement>("#editor-error")!;
     n.hidden = false;
-    n.textContent = err instanceof Error ? err.message : String(err);
+    n.textContent = i18n.message(
+      err instanceof Error ? err.message : String(err),
+    );
   } finally {
     submit.disabled = false;
   }
@@ -331,7 +358,7 @@ function tabs(
   const holder = document.querySelector("#" + id)!;
   holder.replaceChildren(
     ...Object.entries(values).map(([key, label]) => {
-      const b = button(label, () => {
+      const b = button(tr(label), () => {
         set(key);
         remember();
         render();
@@ -344,21 +371,24 @@ function tabs(
 function render() {
   tabs(
     "kind-tabs",
-    { mine: "Meine", delegated: "Bei anderen" },
+    { mine: tr("Mine"), delegated: tr("Delegated") },
     kind,
     (v) => (kind = v),
   );
   tabs(
     "status-tabs",
-    { open: "Offen", done: "Erledigt", all: "Alle" },
+    { open: tr("Open"), done: tr("Done"), all: tr("All") },
     view,
     (v) => (view = v),
   );
   document.querySelector("#subtitle")!.textContent =
-    "Deine Aufgaben aus Outlook, Teams und Fyxer. " +
+    tr("Your tasks from Outlook, Teams, and Fyxer.") +
+    " " +
     (data.lastReport
-      ? "Zuletzt erfolgreich geprüft: " + dateLabel(data.lastReport) + "."
-      : "Noch kein erfolgreicher Import.");
+      ? tr("Last successful check: {date}.", {
+          date: dateLabel(data.lastReport),
+        })
+      : tr("No successful import yet."));
   renderStats();
   renderSources();
   renderList();
@@ -377,14 +407,14 @@ function renderStats() {
     [number, string, boolean],
     [number, string, boolean],
   ] = [
-    [mine.length, "Offen", false],
-    [mine.filter((t) => t.due && t.due < today).length, "Überfällig", true],
-    [mine.filter((t) => t.due === today).length, "Heute fällig", false],
+    [mine.length, tr("Open"), false],
+    [mine.filter((t) => t.due && t.due < today).length, tr("Overdue"), true],
+    [mine.filter((t) => t.due === today).length, tr("Due today"), false],
     [mine.filter((t) => t.prio === 1).length, "P1", false],
-    [others.length, "Bei anderen offen", false],
+    [others.length, tr("Delegated and open"), false],
     [
       others.filter((t) => t.due && t.due < today).length,
-      "davon überfällig",
+      tr("of these overdue"),
       true,
     ],
   ];
@@ -392,7 +422,10 @@ function renderStats() {
   stats.replaceChildren(
     ...items.map(([n, label, red]) => {
       const e = el("div", undefined, "stat" + (red ? " overdue" : ""));
-      e.append(el("strong", String(n)), document.createTextNode(label));
+      e.append(
+        el("strong", new Intl.NumberFormat(i18n.locale).format(n)),
+        document.createTextNode(label),
+      );
       return e;
     }),
   );
@@ -400,12 +433,12 @@ function renderStats() {
 function renderSources() {
   const summary = document.querySelector("#source-summary")!;
   summary.replaceChildren(
-    el("strong", "Quellen & Morning Brief"),
+    el("strong", tr("Sources & Morning Brief")),
     el(
       "span",
       data.allSourcesOk
-        ? "Alle Quellen geprüft"
-        : "Quellenprüfung offen oder unvollständig",
+        ? tr("All sources checked")
+        : tr("Source checks pending or incomplete"),
       "source-mini",
     ),
   );
@@ -414,23 +447,27 @@ function renderSources() {
     ...data.sources.map((s) => {
       const card = el("div", undefined, "source-card");
       card.append(
-        el("strong", providers[s.provider]),
+        el("strong", tr(providers[s.provider])),
         el(
           "span",
           {
-            never: "Noch nicht geprüft",
-            running: "Prüfung läuft",
-            ok: "Geprüft",
-            partial: "Teilweise geprüft",
-            error: "Zugriff fehlgeschlagen",
+            never: tr("Not checked yet"),
+            running: tr("Check in progress"),
+            ok: tr("Checked"),
+            partial: tr("Partially checked"),
+            error: tr("Access failed"),
           }[s.status],
           s.status === "ok" ? "ok" : s.status === "error" ? "error-text" : "",
         ),
-        el("p", s.message),
+        el("p", i18n.message(s.message)),
       );
       if (s.lastSuccessAt)
         card.append(
-          el("div", "Erfolgreich bis " + dateLabel(s.lastSuccessAt), "muted"),
+          el(
+            "div",
+            tr("Checked through {date}", { date: dateLabel(s.lastSuccessAt) }),
+            "muted",
+          ),
         );
       if (s.coverageFrom && s.coverageTo)
         card.append(
@@ -445,23 +482,31 @@ function renderSources() {
   );
   const setup = document.querySelector("#setup")!;
   const agent = el("select");
-  agent.setAttribute("aria-label", "Import-Agent");
-  agent.add(new Option("Import-Agent wählen", ""));
+  agent.setAttribute("aria-label", tr("Import agent"));
+  agent.add(new Option(tr("Select import agent"), ""));
   for (const a of data.agents)
-    agent.add(new Option(a.name + " · " + a.status, a.id));
+    agent.add(
+      new Option(
+        a.name +
+          " · " +
+          tr(a.status.charAt(0).toUpperCase() + a.status.slice(1)),
+        a.id,
+      ),
+    );
   agent.value = data.collectorAgentId ?? "";
-  const save = button("Agent einrichten", () => {
+  const save = button(tr("Set up agent"), () => {
     if (agent.value) void action({ op: "configure", agentId: agent.value });
   });
   const run = button(
-    "Office & Fyxer jetzt prüfen",
+    tr("Check Office & Fyxer now"),
     () => {
       void action({ op: "run" }).then((ok) => {
         if (ok) {
           const n = document.querySelector<HTMLElement>("#notice")!;
           n.hidden = false;
-          n.textContent =
-            "Der Importauftrag wurde gestartet. Ergebnisse erscheinen hier, sobald sie gespeichert sind.";
+          n.textContent = tr(
+            "The import has started. Results appear here as soon as they are saved.",
+          );
         }
       });
     },
@@ -470,7 +515,7 @@ function renderSources() {
   run.disabled = !data.collectorAgentId;
   const enabled = data.routine?.status === "active";
   const schedule = button(
-    enabled ? "Morning Brief pausieren" : "Morning Brief aktivieren",
+    enabled ? tr("Pause Morning Brief") : tr("Enable Morning Brief"),
     () => {
       void action({ op: "schedule", enabled: !enabled });
     },
@@ -479,7 +524,9 @@ function renderSources() {
   setup.replaceChildren(
     el(
       "p",
-      "Der Import-Agent liest Outlook, Teams und Fyxer. Die tägliche Routine läuft nach Aktivierung werktags um 09:00 Uhr (Berlin). Deine Quellen werden nur gelesen.",
+      tr(
+        "The import agent reads Outlook, Teams, and Fyxer. Once enabled, the daily routine runs on weekdays at 09:00 (Berlin). Your sources are read-only.",
+      ),
     ),
     agent,
     save,
@@ -490,7 +537,10 @@ function renderSources() {
 function sourceLink(s: Source) {
   const row = el("div");
   const label =
-    s.title + " · " + dateLabel(s.date) + (s.at ? " · " + s.at : "");
+    (s.title === "Manuell angelegt" ? tr("Manually created") : s.title) +
+    " · " +
+    dateLabel(s.date) +
+    (s.at ? " · " + s.at : "");
   if (s.url) {
     const a = el("a", label, "source-link");
     a.href = s.url;
@@ -502,7 +552,7 @@ function sourceLink(s: Source) {
 }
 function renderList() {
   const today = localDay(),
-    q = search.trim().toLocaleLowerCase("de");
+    q = search.trim().toLocaleLowerCase(i18n.locale);
   const items = data.tasks
     .filter(
       (t) =>
@@ -522,14 +572,14 @@ function renderList() {
             ...t.sources.map((s) => s.title),
           ]
             .join(" ")
-            .toLocaleLowerCase("de")
+            .toLocaleLowerCase(i18n.locale)
             .includes(q)),
     )
     .sort(
       (a, b) =>
         a.prio - b.prio ||
         (a.due ?? "9999").localeCompare(b.due ?? "9999") ||
-        a.title.localeCompare(b.title, "de"),
+        a.title.localeCompare(b.title, i18n.locale),
     );
   const list = document.querySelector("#list")!;
   list.replaceChildren();
@@ -539,14 +589,16 @@ function renderList() {
       el(
         "strong",
         data.tasks.length
-          ? "Keine passenden Aufgaben"
-          : "Dein Aufgaben-Board ist bereit",
+          ? tr("No matching tasks")
+          : tr("Your task board is ready"),
       ),
       el(
         "p",
         data.tasks.length
-          ? "Passe deine Suche oder Filter an."
-          : "Lege eine Aufgabe an oder richte unter „Quellen & Morning Brief“ deinen Import-Agenten ein.",
+          ? tr("Adjust your search or filters.")
+          : tr(
+              "Add a task or set up your import agent under Sources & Morning Brief.",
+            ),
       ),
     );
     list.append(e);
@@ -556,28 +608,28 @@ function renderList() {
   for (const t of items) {
     const group =
       t.status === "done"
-        ? "Erledigt"
+        ? tr("Done")
         : t.due && t.due < today
-          ? "Überfällig"
+          ? tr("Overdue")
           : t.due === today
-            ? "Heute fällig"
+            ? tr("Due today")
             : t.status === "waiting"
-              ? "Wartet auf Rückmeldung"
+              ? tr("Waiting for a reply")
               : t.status === "doing"
-                ? "In Arbeit"
+                ? tr("In progress")
                 : t.due
-                  ? "Anstehend"
-                  : "Ohne Termin";
+                  ? tr("Upcoming")
+                  : tr("No due date");
     groups.set(group, [...(groups.get(group) ?? []), t]);
   }
   for (const name of [
-    "Überfällig",
-    "Heute fällig",
-    "In Arbeit",
-    "Wartet auf Rückmeldung",
-    "Anstehend",
-    "Ohne Termin",
-    "Erledigt",
+    tr("Overdue"),
+    tr("Due today"),
+    tr("In progress"),
+    tr("Waiting for a reply"),
+    tr("Upcoming"),
+    tr("No due date"),
+    tr("Done"),
   ]) {
     const tasks = groups.get(name);
     if (!tasks) continue;
@@ -594,9 +646,10 @@ function renderList() {
       check.checked = t.status === "done";
       check.setAttribute(
         "aria-label",
-        t.status === "done"
-          ? "„" + t.title + "“ wieder öffnen"
-          : "„" + t.title + "“ erledigen",
+        tr(
+          t.status === "done" ? "Reopen “{title}”" : "Mark “{title}” as done",
+          { title: t.title },
+        ),
       );
       check.onchange = () => {
         void action({
@@ -622,7 +675,10 @@ function renderList() {
       );
       prio.setAttribute(
         "aria-label",
-        "Priorität von „" + t.title + "“ ändern, aktuell P" + t.prio,
+        tr("Change priority of “{title}”, currently P{priority}", {
+          title: t.title,
+          priority: t.prio,
+        }),
       );
       const body = el("div", undefined, "task-body");
       body.append(el("div", t.title, "task-title"));
@@ -630,7 +686,7 @@ function renderList() {
       badges.append(
         el(
           "span",
-          AREAS[t.area] + (t.areaAuto ? " ?" : ""),
+          areaLabel(t.area) + (t.areaAuto ? " ?" : ""),
           "badge area" + (t.areaAuto ? " auto" : ""),
         ),
       );
@@ -639,22 +695,33 @@ function renderList() {
         badges.append(
           el(
             "span",
-            (t.due < today && t.status !== "done"
-              ? "überfällig seit "
-              : "fällig ") + dateLabel(t.due),
+            tr(
+              t.due < today && t.status !== "done"
+                ? "overdue since {date}"
+                : "due {date}",
+              { date: dateLabel(t.due) },
+            ),
             "due" + (t.due < today && t.status !== "done" ? " overdue" : ""),
           ),
         );
       if (t.category)
         badges.append(
-          el("span", categories[t.category], "badge " + t.category),
+          el("span", tr(categories[t.category]), "badge " + t.category),
         );
       if (t.status !== "open")
-        badges.append(el("span", labels[t.status], "badge"));
+        badges.append(el("span", tr(labels[t.status]), "badge"));
       if (t.autoDone)
-        badges.append(el("span", "Automatisch erledigt", "badge"));
-      if (t.hr) badges.append(el("span", "Personal", "badge"));
-      badges.append(el("span", t.source.title, "source-mini"));
+        badges.append(el("span", tr("Automatically completed"), "badge"));
+      if (t.hr) badges.append(el("span", tr("Personnel"), "badge"));
+      badges.append(
+        el(
+          "span",
+          t.source.title === "Manuell angelegt"
+            ? tr("Manually created")
+            : t.source.title,
+          "source-mini",
+        ),
+      );
       body.append(badges);
       const toggle = button(
         "",
@@ -665,7 +732,10 @@ function renderList() {
         },
         "expand",
       );
-      toggle.setAttribute("aria-label", "Details zu „" + t.title + "“");
+      toggle.setAttribute(
+        "aria-label",
+        tr("Details for “{title}”", { title: t.title }),
+      );
       toggle.setAttribute("aria-expanded", String(expanded.has(t.doc_id)));
       row.append(check, prio, body, toggle);
       article.append(row);
@@ -673,23 +743,25 @@ function renderList() {
         const details = el("div", undefined, "details");
         const dl = el("dl");
         for (const [label, value] of [
-          ["Neuester Stand", t.hint],
-          ["Abschlussnachweis", t.autoDone ? t.completionEvidence : ""],
-          ["So kann der Assistent helfen", t.help],
-          ["Benötigte Angaben / Kontext", t.needs],
-          ["Deine Notiz", t.note],
+          [tr("Latest update"), t.hint],
+          [tr("Completion evidence"), t.autoDone ? t.completionEvidence : ""],
+          [tr("How the assistant can help"), t.help],
+          [tr("Required input / Context"), t.needs],
+          [tr("Your note"), t.note],
         ])
           if (value) dl.append(el("dt", label), el("dd", value));
-        dl.append(el("dt", "Herkunft"));
+        dl.append(el("dt", tr("Sources")));
         const sources = el("dd");
         for (const s of [t.source, ...t.sources]) sources.append(sourceLink(s));
         dl.append(sources);
         details.append(
           dl,
-          button("Bearbeiten", () => openEditor(t)),
+          button(tr("Edit"), () => openEditor(t)),
           el(
             "div",
-            t.doc_id + " · geändert " + dateLabel(t.updatedAt),
+            t.doc_id +
+              " · " +
+              tr("updated {date}", { date: dateLabel(t.updatedAt) }),
             "source-mini",
           ),
         );
@@ -700,6 +772,30 @@ function renderList() {
   }
 }
 let refreshPending = false;
+// Language changes update labels in place, preserving unsaved form values and notes.
+const languageObserver = new MutationObserver(() => {
+  const next = createI18n(document.documentElement.lang);
+  if (next.locale === i18n.locale) return;
+  i18n = next;
+  localizeStaticCopy();
+  for (const select of [selectArea, field("area") as HTMLSelectElement])
+    for (const option of select.options)
+      option.textContent = option.value
+        ? areaLabel(option.value as keyof typeof AREAS)
+        : tr("All areas");
+  adjustForm();
+  document.querySelector("#editor-title")!.textContent = tr(
+    editing ? "Edit task" : "New task",
+  );
+  render();
+});
+languageObserver.observe(document.documentElement, {
+  attributes: true,
+  attributeFilter: ["lang"],
+});
+window.addEventListener("pagehide", () => languageObserver.disconnect(), {
+  once: true,
+});
 async function invalidate() {
   if (refreshPending) return;
   refreshPending = true;

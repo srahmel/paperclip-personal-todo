@@ -8,6 +8,7 @@ import type {
 } from "@paperclipai/plugin-sdk";
 import { createService } from "../src/service.js";
 import { localDay } from "../src/model.js";
+import { resolveLocale } from "../src/i18n.js";
 const ns = "plugin_personal_todo_f8dc7ec3ac",
   db = new PGlite();
 await db.exec("CREATE SCHEMA " + ns);
@@ -199,8 +200,26 @@ const server = createServer(async (req, res) => {
       res.end(JSON.stringify(value));
       return;
     }
+    let html = await readFile(
+      new URL("../dist/ui/board.html", import.meta.url),
+      "utf8",
+    );
+    const locale = resolveLocale(url.searchParams.get("lang"));
+    html = html.replace('<html lang="en">', '<html lang="' + locale + '">');
+    if (url.searchParams.get("controls") === "1") {
+      // Preview-only controls exercise live language changes without production settings.
+      html = html
+        .replace(
+          "<body>",
+          `<body><aside style="padding:8px 12px;border-bottom:1px solid var(--line)"><label>Preview language<select id="preview-language"><option value="en"${locale.startsWith("en") ? " selected" : ""}>English</option><option value="de"${locale.startsWith("de") ? " selected" : ""}>Deutsch</option></select></label></aside>`,
+        )
+        .replace(
+          "</body>",
+          '<script>document.querySelector("#preview-language").onchange=(e)=>{document.documentElement.lang=e.target.value;};</script></body>',
+        );
+    }
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-    res.end(await readFile(new URL("../dist/ui/board.html", import.meta.url)));
+    res.end(html);
   } catch (e) {
     res.writeHead((e as { status?: number }).status ?? 500, {
       "Content-Type": "application/json",
@@ -208,8 +227,11 @@ const server = createServer(async (req, res) => {
     res.end(JSON.stringify({ error: (e as Error).message }));
   }
 });
-server.listen(3318, "127.0.0.1", () =>
-  console.log("Isolated preview: http://127.0.0.1:3318/?companyId=preview"),
+const port = Number(process.env.PERSONAL_TODO_PREVIEW_PORT ?? 3318);
+if (!Number.isInteger(port) || port < 1024 || port > 65535)
+  throw new Error("Invalid PERSONAL_TODO_PREVIEW_PORT");
+server.listen(port, "127.0.0.1", () =>
+  console.log(`Isolated preview: http://127.0.0.1:${port}/?companyId=preview`),
 );
 async function stop() {
   for (const c of clients) c.end();

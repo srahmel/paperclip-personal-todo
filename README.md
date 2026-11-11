@@ -1,10 +1,10 @@
-# Sebastians Aufgaben-Board
+# Sebastian's Task Board
 
-Persönliche Aufgaben aus **Outlook, Microsoft Teams und Fyxer-Meetings**, direkt in Paperclip. Deutsche Oberfläche mit „Meine“ / „Bei anderen“, Fristen, Prioritäten, Bereichen, Quellen, Notizen und Live-Aktualisierung.
+Personal tasks from **Outlook, Microsoft Teams, and Fyxer meetings**, directly in Paperclip. Track your own and delegated tasks with due dates, priorities, areas, sources, notes, and live updates.
 
 ## Installation
 
-Voraussetzungen: Node.js ab 24.11, pnpm 9.15.4 und eine selbst gehostete Paperclip-Instanz mit Plugin-Datenbank, eigenen API-Routen und verwalteten Routinen. Entwickelt mit dem offiziellen SDK **2026.1106.0**. Das Plugin läuft als vertrauenswürdiger Code in deiner Paperclip-Instanz.
+Requirements: Node.js 24.11 or later, pnpm 9.15.4, and a self-hosted Paperclip instance with plugin databases, custom API routes, and managed routines. Built with the official SDK **2026.1106.0**. The plugin runs as trusted code inside your Paperclip instance.
 
 ```sh
 git clone https://github.com/srahmel/paperclip-personal-todo.git
@@ -16,60 +16,70 @@ paperclipai plugin install . --api-base http://127.0.0.1:3100
 paperclipai plugin inspect srahmel.personal-todo --api-base http://127.0.0.1:3100
 ```
 
-Danach erscheint **Meine Aufgaben** in der Seitenleiste. Der Organisationspfad lautet `/<Organisationskürzel>/personal-todo`.
+**My tasks** appears in the sidebar. The organization-scoped route is `/<organization-prefix>/personal-todo`.
 
-Falls dein Server ein anderes `PAPERCLIP_HOME` nutzt, setze es auch für die CLI. Eine vorhandene Browser-Anmeldung meldet die CLI nicht automatisch an. Ein nur für die Installation angelegter CLI-Zugang lässt sich danach mit `paperclipai auth logout` widerrufen und lokal entfernen.
+If your server uses a different `PAPERCLIP_HOME`, set it for the CLI as well. An existing browser session does not automatically authenticate the CLI. Revoke and remove an installation-only CLI credential afterward with `paperclipai auth logout`.
 
-Lokale Installationen bleiben mit diesem Ordner verbunden. `pnpm dev` baut Änderungen neu; Paperclip lädt die aktualisierten Worker-Dateien. Nach Änderungen der Oberfläche gegebenenfalls die Browserseite neu laden. Änderungen an Manifest-Deklarationen können ein Plugin-Upgrade benötigen; vorhandene Routinen werden zum Schutz manueller Einstellungen nicht still zurückgesetzt.
+Local installations remain linked to this directory. `pnpm dev` rebuilds changes, and Paperclip reloads updated worker files. Reload the browser page after UI changes if needed. Changes to manifest declarations may require a plugin upgrade; existing routines are not silently reset, preserving manual settings.
 
-## Quellen und Morning Brief
+## UI language and appearance
 
-1. Im Board **Quellen & Morning Brief** aufklappen.
-2. Einen vorhandenen, autorisierten Import-Agenten wählen und **Agent einrichten** anklicken.
-3. **Office & Fyxer jetzt prüfen** startet einen sichtbaren Paperclip-Auftrag.
-4. Nach erfolgreicher Quellenprüfung bei Bedarf **Morning Brief aktivieren**. Der Zeitplan ist Montag bis Freitag um 09:00 Uhr in `Europe/Berlin`; neue Routinen sind zunächst pausiert.
+The embedded board follows Paperclip's declared document language and watches for changes. English and German labels are available, including accessible labels, validation messages, and date formatting. Unsupported or invalid locales fall back to English. The current host version declares English; its small German translation catalog does not provide a fully translated German Paperclip UI or a language selector.
 
-Der Collector nutzt seine vorhandenen Zugriffe. Das Plugin enthält keine OAuth-Geheimnisse und fordert keine neuen Quellenberechtigungen an. Ein in Codex verfügbarer Zugriff ist nicht automatisch ein Nachweis für den Zugriff eines getrennten Paperclip-Agentenlaufs.
+The board does not choose a separate language from the browser or task content. Changing the host language updates labels in place and preserves unsaved form values. Task titles, notes, source messages, and imported content retain their original language. The standalone HTML file defaults to English; a hosting application can set its document's `lang` attribute. The isolated preview accepts `?companyId=preview&lang=de` for German checks. Add `&controls=1` to exercise live language changes with a preview-only selector.
 
-| Quelle  | Zugriff des Collectors                                                                                                                                               |
-| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Outlook | Vorhandene direkte Codex-Outlook-Werkzeuge oder OWA im eigenen Brave-Agentenprofil. Nur lesend. Kein Aggregator und keine neue Paperclip-Outlook-Verbindung.         |
-| Teams   | Vorhandene direkte Teams-Werkzeuge oder eine bestehende autorisierte Teams-Websitzung. Nur lesend.                                                                   |
-| Fyxer   | Vorhandene Fyxer-Werkzeuge `search_context`, `find_recordings`, `get_recording`, bei Bedarf `get_transcript`. Action Items und konkrete Zusagen aus Meetings prüfen. |
+Colors, typography, compact task rows, tabs, and controls follow Paperclip's design. Inside Paperclip, the board uses the host's current color tokens and Inter font. Light/dark theme changes apply without reloading. The standalone HTML keeps its embedded IBM Plex fonts and its own theme button.
 
-Alle drei Quellen werden unabhängig geprüft. Fehlender Zugriff, Suchlimits oder unvollständig gelesene Seiten erscheinen als Fehler oder Teilimport. Nur ein vollständig geprüfter Zeitraum verschiebt den letzten erfolgreichen Prüfzeitpunkt. Ein neuer Collector-Lauf setzt die Quellen zunächst auf „Prüfung läuft“; fehlende Abschlussmeldungen werden nach 30 Minuten als unvollständig angezeigt.
+Code comments and README documentation are always written in English.
 
-Der erste Import prüft die letzten 30 Tage; Folgeimporte nutzen je Quelle den letzten erfolgreichen Zeitpunkt mit zwei Tagen Überlappung. Lange Zeiträume müssen in kleinere Fenster geteilt werden. Fremde Unternehmens-/Kontosphären werden durch die vorhandenen Agentenregeln ausgeschlossen. Das Plugin teilt oder versendet keine Quellinhalte.
+## Sources and Morning Brief
 
-## Daten und Bearbeitung
+1. Expand **Sources & Morning Brief** in the board.
+2. Select an existing authorized import agent and click **Set up agent**.
+3. **Check Office & Fyxer now** starts a visible Paperclip task.
+4. After checking source access, click **Enable Morning Brief** if desired. It runs Monday through Friday at 09:00 in `Europe/Berlin`; new routines start paused.
 
-Optionale Zugriffsprofile für **Softeria Microsoft 365 MCP** und **Microsoft Playwright MCP** stehen unter [Integrationen](docs/integrations.md). Die Vorlagen sind nicht aktiviert und enthalten keine Zugangsdaten.
+The collector uses its existing access. The plugin contains no OAuth secrets and does not request new source permissions. Access available in Codex does not automatically establish access for a separate Paperclip agent run.
 
-- Jede Aufgabe liegt als einzelnes JSON-Dokument in der PostgreSQL-Tabelle `tasks` des vom Host isolierten Plugin-Schemas.
-- Alle Abfragen sind auf Organisation und authentifizierten Benutzer begrenzt. Ein explizit gewählter Collector darf nur sein gebundenes Board lesen und Importe ergänzen.
-- Manuell geänderte Felder bleiben vor Import-Überschreibung geschützt. Notizen werden nie aus Quellen ersetzt. Erledigte Aufgaben werden nicht automatisch wieder geöffnet.
-- Stabile `sourceKey`-Werte verhindern Wiederholungen derselben Fundstelle. `taskKey` und optional `existingId` verbinden sicher identische Aufgaben aus verschiedenen Quellen. Die fachliche Identitätsentscheidung trifft der Collector; unklare Fälle bleiben getrennt.
-- Automatisch „Erledigt“ braucht einen expliziten `completionEvidence`-Nachweis. Er wird mit der Aufgabe gespeichert und im Board angezeigt.
-- Browseränderungen nutzen Revisionsnummern. Bei einem gleichzeitigen Update wird dein Entwurf erhalten und ein Konflikt angezeigt.
-- `localStorage` enthält ausschließlich Tab- und Bereichsauswahl, immer mit Fehlerbehandlung. Aufgaben werden dort nicht gespeichert.
-- Streams enthalten nur Änderungsereignisse. Die Oberfläche liest danach die benutzergebundenen Aufgaben neu; auch nach einer Wiederverbindung.
-- „Bei anderen“ ist eine Nachverfolgung und startet keine Ausführungsaufgabe bei dieser Person.
+| Source  | Collector access                                                                                                                                              |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Outlook | Existing direct Codex Outlook tools, or OWA in the agent's own Brave profile. Read-only. No aggregator or new Paperclip Outlook connection.                   |
+| Teams   | Existing direct Teams tools or an existing authorized Teams web session. Read-only.                                                                           |
+| Fyxer   | Existing `search_context`, `find_recordings`, `get_recording`, and, when needed, `get_transcript` tools. Check meeting action items and concrete commitments. |
 
-Pro Organisation kann die eine verwaltete Morning-Brief-Routine an genau ein persönliches Board gebunden werden. Andere Benutzer erhalten eigene leere Ansichten und können das private Board nicht lesen.
+Each source is checked independently. Missing access, search limits, or incomplete pagination appear as errors or partial imports. Only a fully checked coverage period advances the last successful checkpoint. A new collector run initially marks sources as being checked; a missing completion report becomes incomplete after 30 minutes.
 
-Das `hr`-Flag ist eine Kennzeichnung, keine zusätzliche Berechtigungsgrenze innerhalb deines eigenen Boards. Die Sichtbarkeit wird durch die Benutzer-/Collector-Bindung geschützt.
+The first import checks the last 30 days. Subsequent imports use each source's last successful checkpoint with a two-day overlap. Split long periods into smaller windows. Existing agent rules exclude unrelated organizations and account contexts. The plugin does not share or send source content.
 
-## Werkzeuge und API
+Optional access profiles for **Softeria Microsoft 365 MCP** and **Microsoft Playwright MCP** are documented in [Integrations](docs/integrations.md). These templates are disabled and contain no credentials.
 
-Das Plugin registriert für den gebundenen Import-Agenten:
+## Data and editing
+
+- Each task is a separate JSON document in the `tasks` PostgreSQL table within the host-isolated plugin schema.
+- All queries are scoped to the organization and authenticated user. An explicitly selected collector can read and import into its bound board only.
+- Manually changed fields are protected from import overwrites. Notes are never replaced by source content. Completed tasks are not automatically reopened.
+- Stable `sourceKey` values prevent repeated imports of the same mention. `taskKey` and optional `existingId` connect confidently identical tasks across sources. The collector determines task identity; ambiguous cases remain separate.
+- Automatic completion requires explicit `completionEvidence`, stored with the task and displayed in the board.
+- Browser edits use revision numbers. Concurrent updates produce a conflict and preserve your draft.
+- `localStorage` contains only tab and area selections, always with error handling. Tasks are never stored there.
+- Streams contain invalidations only. The UI then reloads user-scoped tasks, including after reconnection.
+- Delegated tasks are for tracking and do not assign execution work to another person.
+
+The single managed Morning Brief routine per organization can be bound to exactly one personal board. Other users receive their own empty views and cannot read that private board.
+
+The `hr` flag is a label, not an additional permission boundary within your board. Visibility is controlled by the user/collector binding.
+
+## Tools and API
+
+The plugin registers these tools for its bound import agent:
 
 - `srahmel.personal-todo:list_tasks`
 - `srahmel.personal-todo:upsert_tasks`
 - `srahmel.personal-todo:report_source`
 
-Die eigene API liegt unter `/api/plugins/srahmel.personal-todo/api/board`. `GET` verwendet `companyId` als Queryparameter; `POST` nimmt `companyId` und `op` als JSON an. Der Host authentifiziert Board-Benutzer oder Agenten. Benutzer-IDs aus Request-Daten werden nicht als Zugriffsberechtigung verwendet.
+The API is exposed at `/api/plugins/srahmel.personal-todo/api/board`. `GET` takes `companyId` as a query parameter; `POST` takes `companyId` and `op` in JSON. The host authenticates board users or agents. User IDs supplied in request data never grant access.
 
-Für CLI-Adapter ohne direkt angebotene Plugin-Werkzeuge gibt es `scripts/import_tasks.py`. Es nutzt ausschließlich die vom Paperclip-Lauf bereitgestellten Umgebungsvariablen und protokolliert keine Schlüssel:
+For CLI adapters that do not expose plugin tools directly, use `scripts/import_tasks.py`. It uses only environment variables supplied by the Paperclip run and does not log keys:
 
 ```sh
 python scripts/import_tasks.py list
@@ -77,7 +87,7 @@ python scripts/import_tasks.py upsert --payload /path/to/tasks.json
 python scripts/import_tasks.py report --payload /path/to/source-status.json
 ```
 
-`upsert` erwartet beispielsweise synthetische Daten dieses Formats:
+For example, `upsert` accepts synthetic task data in this format. German task content is independent of the UI language:
 
 ```json
 {
@@ -98,11 +108,9 @@ python scripts/import_tasks.py report --payload /path/to/source-status.json
 }
 ```
 
-## HTML-Artefakt und Entwicklung
+## HTML artifact and development
 
-Das eigentliche Board besteht aus Vanilla TypeScript/JavaScript, HTML und CSS. Der Build erzeugt **eine eigenständige HTML-Datei** `dist/aufgaben-board.html` mit eingebetteten IBM-Plex-Schriften. Eine kleine React-Hülle bindet dieselbe Datei als vertrauenswürdige Plugin-Seite ein. Die persönliche Authentifizierung und Datenspeicherung benötigen weiterhin den Paperclip-Host; eine isolierte gewöhnliche Paperclip-HTML-Artefaktvorschau erlaubt keine API-Zugriffe.
-
-In Paperclip übernimmt das Board die aktuellen Farb- und Theme-Tokens sowie die vom Host bereitgestellte Inter-Schrift. Ein Wechsel zwischen Hell- und Dunkelmodus wird ohne Neuladen übernommen. Die eigenständige HTML-Datei verwendet weiterhin ihre eingebetteten IBM-Plex-Schriften und einen eigenen Theme-Schalter. Kompakte Listenzeilen, neutrale Tabs und dezente Statusfarben orientieren sich an Paperclips Oberfläche.
+The board uses vanilla TypeScript/JavaScript, HTML, and CSS. The build creates **one standalone HTML file**, `dist/aufgaben-board.html`, with embedded IBM Plex fonts. A small React shell embeds the same file as a trusted plugin page. Personal authentication and storage still require the Paperclip host; an ordinary isolated Paperclip HTML artifact preview does not allow API access.
 
 ```sh
 pnpm typecheck
@@ -112,6 +120,6 @@ pnpm dev
 pnpm preview
 ```
 
-`tests/service.spec.ts` prüft das tatsächliche SQL gegen PGlite: Entdoppelung, Revisionskonflikte, Benutzer-/Organisationsgrenzen, Collector-Zugriff, Erledigt-Nachweise und unabhängige Quellstatus. `scripts/preview.ts` bietet einen isolierten Testserver mit ausschließlich synthetischen Daten unter Port 3318. Dafür kann ein vorhandener TypeScript-Loader genutzt werden. Der Preview-Server verbindet sich mit keiner produktiven Quelle oder Paperclip-Datenbank.
+`tests/service.spec.ts` checks real SQL against PGlite: deduplication, revision conflicts, user/organization boundaries, collector access, completion evidence, and independent source status. `tests/i18n.spec.ts` checks locale resolution, translation placeholders, accessible labels, and source-content preservation. `scripts/preview.ts` serves synthetic data only on port 3318 (override with `PERSONAL_TODO_PREVIEW_PORT`), without connecting to production sources or Paperclip databases.
 
-Das Repository enthält Quellcode und synthetische Testdaten. Echte Aufgaben, E-Mails, Transkripte, Sessions und Zugangsdaten gehören ausschließlich in die laufende Instanz.
+This repository contains source code and synthetic test data. Real tasks, emails, transcripts, sessions, and credentials belong only in the running instance.
