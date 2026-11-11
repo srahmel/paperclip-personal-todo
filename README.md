@@ -102,6 +102,8 @@ python scripts/import_tasks.py report --payload /path/to/source-status.json
 
 Das eigentliche Board besteht aus Vanilla TypeScript/JavaScript, HTML und CSS. Der Build erzeugt **eine eigenständige HTML-Datei** `dist/aufgaben-board.html` mit eingebetteten IBM-Plex-Schriften. Eine kleine React-Hülle bindet dieselbe Datei als vertrauenswürdige Plugin-Seite ein. Die persönliche Authentifizierung und Datenspeicherung benötigen weiterhin den Paperclip-Host; eine isolierte gewöhnliche Paperclip-HTML-Artefaktvorschau erlaubt keine API-Zugriffe.
 
+In Paperclip übernimmt das Board die aktuellen Farb- und Theme-Tokens sowie die vom Host bereitgestellte Inter-Schrift. Ein Wechsel zwischen Hell- und Dunkelmodus wird ohne Neuladen übernommen. Die eigenständige HTML-Datei verwendet weiterhin ihre eingebetteten IBM-Plex-Schriften und einen eigenen Theme-Schalter. Kompakte Listenzeilen, neutrale Tabs und dezente Statusfarben orientieren sich an Paperclips Oberfläche.
+
 ```sh
 pnpm typecheck
 pnpm test
