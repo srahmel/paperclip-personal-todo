@@ -19,4 +19,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: personal-todo-html
-          path: dist/aufgaben-board.html
+          path: dist/personal-task-board.html

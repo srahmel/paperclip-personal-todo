@@ -10,9 +10,9 @@ export const PLUGIN_ID = "srahmel.personal-todo";
 export const tools = [
   {
     name: "list_tasks",
-    displayName: "Aufgaben vor dem Import lesen",
+    displayName: "Read tasks before import",
     description:
-      "Liest Aufgaben und Quellstatus des für diesen Agenten freigegebenen persönlichen Boards.",
+      "Reads tasks and source status from the personal board authorized for this agent.",
     parametersSchema: {
       type: "object",
       properties: {},
@@ -21,9 +21,9 @@ export const tools = [
   },
   {
     name: "upsert_tasks",
-    displayName: "Aufgaben aus Office oder Fyxer ergänzen",
+    displayName: "Import tasks from Office or Fyxer",
     description:
-      "Entdoppelt belegte Aufgaben. Manuelle Notizen und Änderungen bleiben erhalten.",
+      "Deduplicates evidenced tasks while preserving manual notes and edits.",
     parametersSchema: {
       type: "object",
       properties: {
@@ -82,9 +82,9 @@ export const tools = [
   },
   {
     name: "report_source",
-    displayName: "Quellenprüfung melden",
+    displayName: "Report source checks",
     description:
-      "Meldet tatsächliche Abdeckung und Fehler je Quelle; nur vollständig erfolgreiche Abfragen verschieben den Prüfzeitpunkt.",
+      "Reports actual coverage and errors for each source; only complete successful checks advance the checkpoint.",
     parametersSchema: {
       type: "object",
       properties: {
@@ -103,10 +103,10 @@ export const tools = [
 const manifest: PaperclipPluginManifestV1 = {
   id: PLUGIN_ID,
   apiVersion: 1,
-  version: "0.1.0",
-  displayName: "Sebastians Aufgaben-Board",
+  version: "0.1.1",
+  displayName: "Personal Task Board",
   description:
-    "Persönliche Aufgaben aus Outlook, Teams und Fyxer mit Quellen, Fristen und manueller Bearbeitung.",
+    "Personal tasks from Outlook, Teams, and Fyxer with sources, due dates, and manual editing.",
   author: "srahmel",
   categories: ["ui", "automation"],
   capabilities: [
@@ -145,7 +145,7 @@ const manifest: PaperclipPluginManifestV1 = {
   routines: [
     {
       routineKey: "morning-brief",
-      title: "Aufgaben-Board: Morning Brief (Office + Fyxer)",
+      title: "Personal Task Board: Morning Brief (Office + Fyxer)",
       description: collectorInstructions,
       status: "paused",
       priority: "medium",
@@ -154,7 +154,7 @@ const manifest: PaperclipPluginManifestV1 = {
       triggers: [
         {
           kind: "schedule",
-          label: "Werktags morgens",
+          label: "Weekday mornings",
           enabled: true,
           cronExpression: "0 9 * * 1-5",
           timezone: "Europe/Berlin",
@@ -169,14 +169,14 @@ const manifest: PaperclipPluginManifestV1 = {
       {
         type: "page",
         id: "board",
-        displayName: "Meine Aufgaben",
+        displayName: "My tasks",
         exportName: "BoardPage",
         routePath: "personal-todo",
       },
       {
         type: "sidebar",
         id: "board-link",
-        displayName: "Meine Aufgaben",
+        displayName: "My tasks",
         exportName: "BoardSidebar",
       },
     ],

@@ -1,4 +1,4 @@
-# Sebastian's Task Board
+# Personal Task Board
 
 Personal tasks from **Outlook, Microsoft Teams, and Fyxer meetings**, directly in Paperclip. Track your own and delegated tasks with due dates, priorities, areas, sources, notes, and live updates.
 
@@ -110,7 +110,7 @@ For example, `upsert` accepts synthetic task data in this format. German task co
 
 ## HTML artifact and development
 
-The board uses vanilla TypeScript/JavaScript, HTML, and CSS. The build creates **one standalone HTML file**, `dist/aufgaben-board.html`, with embedded IBM Plex fonts. A small React shell embeds the same file as a trusted plugin page. Personal authentication and storage still require the Paperclip host; an ordinary isolated Paperclip HTML artifact preview does not allow API access.
+The board uses vanilla TypeScript/JavaScript, HTML, and CSS. The build creates **one standalone HTML file**, `dist/personal-task-board.html`, with embedded IBM Plex fonts. A small React shell embeds the same file as a trusted plugin page. Personal authentication and storage still require the Paperclip host; an ordinary isolated Paperclip HTML artifact preview does not allow API access.
 
 ```sh
 pnpm typecheck

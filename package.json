@@ -1,9 +1,9 @@
 {
   "name": "@srahmel/paperclip-personal-todo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "private": true,
-  "description": "Persönliches Aufgaben-Board mit Microsoft-365- und Fyxer-Import für Paperclip",
+  "description": "Personal task board with Microsoft 365 and Fyxer imports for Paperclip",
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "build": "node ./esbuild.config.mjs",

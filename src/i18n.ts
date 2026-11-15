@@ -1,6 +1,6 @@
 export const german: Record<string, string> = {
   "Task board": "Aufgaben-Board",
-  "Sebastian's Task Board": "Sebastians Aufgaben-Board",
+  "Personal Task Board": "Personal Task Board",
   "My tasks": "Meine Aufgaben",
   "Select your organization.": "Wähle deine Organisation aus.",
   Open: "Offen",
@@ -26,8 +26,8 @@ export const german: Record<string, string> = {
   "All areas": "Alle Bereiche",
   "Search: title, person, meeting": "Suchen: Titel, Person, Gespräch",
   "Search tasks": "Aufgaben durchsuchen",
-  "Sebastian's Task Board · Your edits are preserved during future imports. Delegated tasks are for tracking and do not assign work.":
-    "Sebastians Aufgaben-Board · Deine Bearbeitungen bleiben bei späteren Imports erhalten. „Bei anderen“ erteilt keinen Ausführungsauftrag.",
+  "Personal Task Board · Your edits are preserved during future imports. Delegated tasks are for tracking and do not assign work.":
+    "Personal Task Board · Deine Bearbeitungen bleiben bei späteren Imports erhalten. „Bei anderen“ erteilt keinen Ausführungsauftrag.",
   "Edit task": "Aufgabe bearbeiten",
   "New task": "Neue Aufgabe",
   "Close dialog": "Dialog schließen",

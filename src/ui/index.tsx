@@ -82,7 +82,7 @@ export function BoardPage() {
   return (
     <iframe
       ref={frame}
-      title={createI18n(locale).t("Sebastian's Task Board")}
+      title={createI18n(locale).t("Personal Task Board")}
       srcDoc={html}
       onLoad={syncAppearance}
       style={{
