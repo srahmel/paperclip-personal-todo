@@ -30,7 +30,7 @@ The board does not choose a separate language from the browser or task content. 
 
 Colors, typography, compact task rows, tabs, and controls follow Paperclip's design. Inside Paperclip, the board uses the host's current color tokens and Inter font. Light/dark theme changes apply without reloading. The standalone HTML keeps its embedded IBM Plex fonts and its own theme button.
 
-Code comments and README documentation are always written in English.
+Code comments and all Markdown documentation are always written in English.
 
 ## Sources and Morning Brief
 
@@ -87,14 +87,14 @@ python scripts/import_tasks.py upsert --payload /path/to/tasks.json
 python scripts/import_tasks.py report --payload /path/to/source-status.json
 ```
 
-For example, `upsert` accepts synthetic task data in this format. German task content is independent of the UI language:
+For example, `upsert` accepts synthetic task data in this format. Task content is independent of the UI language:
 
 ```json
 {
   "provider": "fyxer",
   "tasks": [
     {
-      "title": "Prüfe die Projektfreigabe",
+      "title": "Review the project approval",
       "kind": "mine",
       "sourceKey": "recording-example:action-1",
       "taskKey": "example-project-approval",
@@ -102,7 +102,7 @@ For example, `upsert` accepts synthetic task data in this format. German task co
       "prio": 2,
       "area": "software",
       "category": "partial",
-      "source": { "title": "Beispielbesprechung", "date": "2026-11-01" }
+      "source": { "title": "Example meeting", "date": "2026-11-01" }
     }
   ]
 }
